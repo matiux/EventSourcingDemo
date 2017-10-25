@@ -1,0 +1,71 @@
+# Learn more about services, parameters and containers at
+# http://symfony.com/doc/current/service_container.html
+parameters:
+  amqp_host: localhost
+  amqp_port: 5672
+  amqp_user: guest
+  amqp_password: guest
+
+services:
+  ############################
+  ## Repositories
+  ############################
+  event.store.repository:
+    class: Messenger\Infrastructure\Application\Notification\DoctrineEventStore
+    factory: ['@doctrine', getRepository]
+    arguments: ['Messenger\Domain\Model\Event\StoredEvent']
+    calls:
+      - [setSerializer, ['@jms_serializer']]
+
+  message.repository:
+    class: Messenger\Infrastructure\Domain\Model\Message\DoctrineMessageRepository
+    factory: ['@doctrine', getRepository]
+    arguments: ['Messenger\Domain\Model\Message\Message']
+
+  message.tracker.repository:
+    public: false
+    class: Messenger\Infrastructure\Application\Notification\DoctrinePublishedMessageTracker
+    factory: ['@doctrine', getRepository]
+    arguments: ['Messenger\Domain\Model\Event\PublishedMessage']
+
+  ############################
+  ## Services
+  ############################
+  create.message:
+    class: Messenger\Application\Service\Messenger\CreateMessageService
+    arguments: ['@message.repository']
+
+  ############################
+  ## Events System - Publish & Subscribers
+  ############################
+  persist.domain.event.subscriber:
+    class: Messenger\Domain\Subscriber\PersistAllDomainEventSubscriber
+    arguments: ['@event.store.repository']
+    public: false
+
+  event.publisher:
+    class: Messenger\Domain\DomainEventPublisher
+    factory: ['Messenger\Domain\DomainEventPublisher', instance]
+    calls:
+      - [subscribe, ['@persist.domain.event.subscriber']]
+
+  amqp.connection:
+    public: false
+    class: PhpAmqpLib\Connection\AMQPStreamConnection
+    arguments: ['%amqp_host%', '%amqp_port%', '%amqp_user%', '%amqp_password%']
+
+#  message.producer:
+#    public: false
+#    class: Messenger\Infrastructure\Application\Notification\RabbitMqMessageProducer
+#    arguments: ['@amqp.connection']
+
+  message.producer:
+    public: false
+    class: Messenger\Infrastructure\Application\Notification\AmazonSqsMessageProducer
+#    arguments: ['@amqp.connection']
+
+  notification.service:
+    class: Messenger\Application\Notification\NotificationService
+    arguments: ['@event.store.repository', '@message.tracker.repository', '@message.producer']
+
+

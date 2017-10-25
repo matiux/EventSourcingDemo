@@ -1,0 +1,9 @@
+Messenger\Domain\Model\Message\MessageCreated:
+  exclusion_policy: ALL
+  properties:
+    messageId:
+      exclude: false
+      type: string
+    occurredOn:
+      exclude: false
+      type: DateTime<'Y-m-d H:i:s'>

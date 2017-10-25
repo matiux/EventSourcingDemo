@@ -1,0 +1,22 @@
+Messenger\Domain\Model\Message\Message:
+  type: entity
+  table: messages
+  repositoryClass: Messenger\Infrastructure\Domain\Model\Message\DoctrineMessageRepository
+  id:
+    messageId:
+      type: MessageId
+      column: id
+  fields:
+    subject:
+      type: string
+      nullable: false
+    body:
+      type: text
+    date:
+      type: datetime
+      nullable: false
+    status:
+      type: smallint
+      nullable: true
+      options:
+        comment: 1 = draft | 2 = sent | 3 = read
