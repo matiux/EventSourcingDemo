@@ -32,8 +32,10 @@ class AmazonSqsMessageProducer implements MessageProducer
         \DateTimeInterface $notificationOccurredOn
     )
     {
+        $queueUrl = getenv('AMAZON_SQS_QUEUE_URL');
+
         $result = $this->client->sendMessage([
-            'QueueUrl' => getenv('AMAZON_SQS_QUEUE_URL'),
+            'QueueUrl' => $queueUrl,
             'MessageBody' => $notificationMessage,
         ]);
     }

@@ -8,7 +8,7 @@ interface MessageProducer
 
     public function send(
         string $exchangeName,
-        string$notificationMessage,
+        string $notificationMessage,
         string $notificationType,
         int $notificationId,
         \DateTimeInterface $notificationOccurredOn

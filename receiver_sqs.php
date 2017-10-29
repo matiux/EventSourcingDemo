@@ -4,7 +4,7 @@ use Aws\Sqs\SqsClient;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-(new \Symfony\Component\Dotenv\Dotenv())->load(__DIR__.'/../.env');
+(new \Symfony\Component\Dotenv\Dotenv())->load('.env');
 
 $client = new SqsClient([
     'version' => 'latest',

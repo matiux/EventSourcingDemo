@@ -3,8 +3,8 @@ FROM debian:buster
 RUN apt-get update && apt-get install -y software-properties-common  \
       build-essential pkg-config make git g++ gcc \
       libmemcached-dev libmsgpack-dev libmsgpackc2 zlib1g zlib1g-dev \
-      vim \
-      supervisor \
+      vim vim-gtk3 \
+      supervisor acl \
       php7.1 php7.1-fpm php7.1-bcmath \
       php7.1-bz2 php7.1-cgi php7.1-cli \
       php7.1-common php7.1-curl php7.1-dev \
@@ -28,9 +28,15 @@ RUN sed -i -e 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' /etc/php/7.1/fpm/php.
 RUN sed -i -e 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' /etc/php/7.1/cli/php.ini
 
 # Composer
-RUN curl -sS https://getcomposer.org/installer | php \
-        && mv composer.phar /usr/local/bin/ \
-        && ln -s /usr/local/bin/composer.phar /usr/local/bin/composer
+# RUN curl -sS https://getcomposer.org/installer | php \
+#         && mv composer.phar /usr/local/bin/ \
+#         && ln -s /usr/local/bin/composer.phar /usr/local/bin/composer
+RUN curl -o /tmp/composer-setup.php https://getcomposer.org/installer \
+&& curl -o /tmp/composer-setup.sig https://composer.github.io/installer.sig \
+# Make sure we're installing what we think we're installing!
+&& php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }" \
+&& php /tmp/composer-setup.php --no-ansi --install-dir=/usr/local/bin --filename=composer --snapshot \
+&& rm -f /tmp/composer-setup.*
 
 #Xdebug
 RUN cd /root/ && git clone https://github.com/xdebug/xdebug.git && cd xdebug \
@@ -72,7 +78,7 @@ WORKDIR /var/www/app
 
 # CMD ["/usr/bin/supervisord"]
 
-COPY start-container /usr/local/bin/start-container
+COPY ./start-container /usr/local/bin/start-container
 RUN chmod +x /usr/local/bin/start-container
 
 CMD ["start-container"]

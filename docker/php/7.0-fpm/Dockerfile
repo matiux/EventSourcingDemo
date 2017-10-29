@@ -30,10 +30,10 @@ RUN curl -sS https://getcomposer.org/installer | php \
         && mv composer.phar /usr/local/bin/ \
         && ln -s /usr/local/bin/composer.phar /usr/local/bin/composer
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 #Configuro Xdebug
-COPY xdebug.ini /etc/php/7.0/mods-available/xdebug.ini
+COPY ./xdebug.ini /etc/php/7.0/mods-available/xdebug.ini
 RUN sed -i "s/xdebug\.remote_host=.*/xdebug\.remote_host="$(/sbin/ip route|awk '/default/ { print $3 }')"/" /etc/php/7.0/mods-available/xdebug.ini
 ENV PHP_IDE_CONFIG=serverName=application
 
@@ -47,7 +47,7 @@ WORKDIR /var/www/app
 
 #CMD ["/usr/bin/supervisord"]
 
-COPY start-container /usr/local/bin/start-container
+COPY ./start-container /usr/local/bin/start-container
 RUN chmod +x /usr/local/bin/start-container
 
 CMD ["start-container"]
