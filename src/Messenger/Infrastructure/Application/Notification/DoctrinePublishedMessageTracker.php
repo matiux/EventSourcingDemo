@@ -70,6 +70,10 @@ class DoctrinePublishedMessageTracker extends EntityRepository implements Publis
 
         $this->getEntityManager()->persist($publishedMessage);
 
+        /**
+         * TODO
+         * Andrebbe reso transazionale
+         */
         $this->getEntityManager()->flush($publishedMessage);
     }
 }
